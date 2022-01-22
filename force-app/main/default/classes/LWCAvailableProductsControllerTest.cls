@@ -4,7 +4,7 @@ private with sharing class LWCAvailableProductsControllerTest {
     @isTest
     static void retrieveProductsBasedOnPricebookWithPricebookEntryActive(){
         Test.startTest();
-            List<Product2> availableProductPerPricebookList = 
+            List<PricebookEntry> availableProductPerPricebookList = 
                 LWCAvailableProductsController.getAvailableProducts(stdPricebook.Id);
         Test.stopTest();
 
@@ -14,7 +14,7 @@ private with sharing class LWCAvailableProductsControllerTest {
     @isTest
     static void addProductToTheLineItemsOfTheProductIfTheProductDoesNotExistInTheLineItemAndAssignQuantityEqualsToOne(){
         Test.startTest();
-            LWCAvailableProductsController.addProductLineItems(ord.Id, p2.Id);
+            LWCAvailableProductsController.addProductLineItems('Order', ord.Id, pbeStd2.Id);
         Test.stopTest();
 
         OrderItem oliAddedP2 = [
@@ -30,7 +30,7 @@ private with sharing class LWCAvailableProductsControllerTest {
     @isTest
     static void increaseInOneTheQuantityIfTheProductAlreadyExistInTheLineItems(){
         Test.startTest();
-            LWCAvailableProductsController.addProductLineItems(ord.Id, p1.Id);
+            LWCAvailableProductsController.addProductLineItems('Order', ord.Id, pbeStd1.Id);
         Test.stopTest();
 
         OrderItem oliUpdateQuantityP1 = [
@@ -40,7 +40,7 @@ private with sharing class LWCAvailableProductsControllerTest {
                 AND Product2Id = :p1.Id
         ]; 
 
-        System.assertEquals(2, oliUpdateQuantityP1.Quantity);
+        System.assertEquals(2.00, oliUpdateQuantityP1.Quantity);
     }
 
     @isTest

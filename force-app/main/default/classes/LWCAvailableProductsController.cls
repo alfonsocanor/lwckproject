@@ -15,19 +15,20 @@ public with sharing class LWCAvailableProductsController {
         List<OrderItem> orderItem2Update = new List<OrderItem>();
         Map<String, SObject> pricebookEntryPerXLineItemMap = new Map<String, SObject>();
 
-        String selectQuery = 'SELECT Id, PricebookEntryId, Quantity' ;
-        String fromQuery = 'FROM ' + parentObject;
-        String whereQuery = ' WHERE parentObject' + '=\'' + parentId + '\'';
+        String selectQuery = 'SELECT Id, PricebookEntryId, Quantity ';
+        String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentObject);
+        String whereQuery = ' WHERE ' + parentObject + 'Id=\'' + parentId + '\'';
 
         for(SObject xli: Database.query(selectQuery + fromQuery + whereQuery)){
             pricebookEntryPerXLineItemMap.put((String)xli.get('PricebookEntryId'), (SObject)xli);
         }
 
-        SObject upsertXLineItem = Schema.getGlobalDescribe().get(parentId).newSObject();
+        SObject upsertXLineItem = Schema.getGlobalDescribe().get(Constants.PARENT_XLINEITEMCHILD.get(parentObject)).newSObject();
         if(pricebookEntryPerXLineItemMap.containsKey(pricebookEntryId)){
             upsertXLineItem = pricebookEntryPerXLineItemMap.get(pricebookEntryId);
             Decimal currentQuantity = (Decimal)upsertXLineItem.get('Quantity');
-            upsertXLineItem.put('Quantity', currentQuantity++);
+            currentQuantity++;
+            upsertXLineItem.put('Quantity', currentQuantity);
         } else {
             PricebookEntry pbeInfo = [
                 SELECT Id, Product2Id, UnitPrice
@@ -37,9 +38,12 @@ public with sharing class LWCAvailableProductsController {
             upsertXLineItem.put('PricebookEntryId', pbeInfo.Id);
             upsertXLineItem.put('Product2Id', pbeInfo.Product2Id);
             upsertXLineItem.put('UnitPrice', pbeInfo.UnitPrice);
+            upsertXLineItem.put(parentObject + 'Id', parentId); //Ex: Order + Id = OrderId
             upsertXLineItem.put('Quantity', 1);
         }
 
+        KProjectDebugging.printDebug('upsertXLineItem', upsertXLineItem);
+        
         upsert upsertXLineItem;
     }
 }
