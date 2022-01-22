@@ -1,4 +1,7 @@
 import { LightningElement, api, track, wire } from 'lwc';
+import getAllPricebooks from '@salesforce/apex/LWCAvailableProductsController.getAllPricebooks';
+import getAvailableProducts from '@salesforce/apex/LWCAvailableProductsController.getAvailableProducts';
+
 import {
     APPLICATION_SCOPE,
     createMessageContext,
@@ -13,7 +16,7 @@ import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
 const columns = [
     { label: 'Product', type: 'String', fieldName: 'productName', sortable:true},
     { label: 'Price List', type: 'currency', fieldName: 'unitPrice', sortable:true},
-    { label: '',title:'title', name:'name', type: 'button'}
+    { label: '', type: 'button', typeAttributes: { label: 'Add',}}
 ];
 
 export default class LwcAvailableProducts extends LightningElement {
@@ -24,6 +27,39 @@ export default class LwcAvailableProducts extends LightningElement {
 
     sortDirection = 'asc';
     sortedBy;
+
+    @track options;
+    value = '';
+
+    connectedCallback(){
+        console.log('cC ' + this.recordId);
+        console.log('this.parentName  ' + this.parentName);
+        this.getAllPricebooksFromApex();
+    }
+
+    getAllPricebooksFromApex(){
+        getAllPricebooks()
+        .then(pricebooks => {
+            this.options = pricebooks;
+        })
+        .catch(error => {
+            console.log('error', error);
+        })
+    }
+
+    handleComboboxPricebook(event){
+        this.getAvailableProductsFromApex(event.target.value);
+    }
+
+    getAvailableProductsFromApex(pricebookId){
+        getAvailableProducts({pricebookId})
+        .then(data => {
+            this.data = data;
+        })
+        .catch(error => {
+            console.log('error', error);
+        })
+    }
 
     sortBy(field, reverse, primer) {
         const key = primer

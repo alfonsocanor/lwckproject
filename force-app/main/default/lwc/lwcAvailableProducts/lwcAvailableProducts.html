@@ -1,5 +1,13 @@
 <template>
     <lightning-input type="text" label="Price book" value={pricebookEntry}></lightning-input>
+    <lightning-combobox
+            required
+            label="To process"
+            value={value}
+            options={options}
+            class="slds-col slds-size_1-of-8 slds-m-left_medium dateShippedInputs"
+            onchange={handleComboboxPricebook}>
+    </lightning-combobox>
     <div style="height: 300px;">
         <lightning-datatable
             key-field="pricebookEntryId"

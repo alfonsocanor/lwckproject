@@ -8,7 +8,7 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__AppPage, lightning__RecordPage">
-            <property name="parentName" type="String" datasource="Order,Opportunity,Quote" placeholder="Select Object" required="true"></property>
+            <property name="parentName" type="String" datasource="Order,Opportunity,Quote" placeholder="Select Object" required="true" default="Order"></property>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

@@ -1,6 +1,20 @@
 public with sharing class LWCAvailableProductsController {
 
     @AuraEnabled
+    public static List<LWCComboBoxPricebookWrapper> getAllPricebooks(String recordId, String parentName){
+        List<LWCComboBoxPricebookWrapper> allPricebooks = new List<LWCComboBoxPricebookWrapper>();
+
+        for(Pricebook2 pricebook: [
+            SELECT Name, Id
+            FROM Pricebook2
+        ]){
+            allPricebooks.add(new LWCComboBoxPricebookWrapper(pricebook.Name, pricebook.Id));
+        }
+
+        return allPricebooks;
+    }
+
+    @AuraEnabled
     public static List<LWCDatatableDataWrapper> getAvailableProducts(String pricebookId){
         List<LWCDatatableDataWrapper> productAvailableList = new List<LWCDatatableDataWrapper>();
 
@@ -77,6 +91,15 @@ public with sharing class LWCAvailableProductsController {
             this.pricebookEntryId = pricebookEntryId;
             this.productName = productName;
             this.unitPrice = unitPrice;
+        }
+    }
+
+    public class LWCComboBoxPricebookWrapper{
+        @AuraEnabled public String label;
+        @AuraEnabled public String value;
+        public LWCComboBoxPricebookWrapper(String label, String value){
+            this.label = label;
+            this.value = value;
         }
     }
 }
