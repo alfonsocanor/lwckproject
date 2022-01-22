@@ -5,13 +5,11 @@ import handleXLineItemUpdate from '@salesforce/apex/LWCOrderProductsController.h
 
 import {
     APPLICATION_SCOPE,
-    createMessageContext,
     MessageContext,
-    publish,
-    releaseMessageContext,
     subscribe,
     unsubscribe,
 } from 'lightning/messageService';
+
 import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
 
 const columns = [
@@ -36,19 +34,29 @@ export default class LwcOrderProducts extends LightningElement {
     @api parentName;
     @track data = [];
     columns = columns;
+    isLoading = false;
+
+    updateCauseByLightningMessageService = false;
+
+    @wire(MessageContext)
+    messageContext;
 
     connectedCallback(){
+        this.subscribeToMessageChannel();
         this.getXLineItemsFromApex();
     }
 
+    disconnectedCallback(){
+        this.unsubscribeToMessageChannel();
+    }
+
     getXLineItemsFromApex(){
-        getXLineItems(
-            {
-                parentName : this.parentName,
-                parentId: this.recordId
-            }
-        )
+        getXLineItems({
+            parentName : this.parentName,
+            parentId: this.recordId
+        })
         .then(data => {
+            this.isLoading = false;
             this.data = data;
         })
         .catch(error => {
@@ -58,19 +66,16 @@ export default class LwcOrderProducts extends LightningElement {
     }
 
     handleRowAction(event){
+        this.isLoading = true;
         this.handleXLineItemUpdateFromApex(event.detail.row.xliId);
     }
 
     handleXLineItemUpdateFromApex(xliId){
-        handleXLineItemUpdate(
-            {
-                parentName: this.parentName,
-                xliId
-            }
-        )
+        handleXLineItemUpdate({
+            parentName: this.parentName,
+            xliId
+        })
         .then(() => {
-            console.log('xliId deleted REFRESH!');
-            this. data = [];
             this.getXLineItemsFromApex();
         })
     }
@@ -78,6 +83,28 @@ export default class LwcOrderProducts extends LightningElement {
     refreshTableAndPage(){
         this.getXLineItemsFromApex(); 
         updateRecord({ fields: { Id: this.recordId } });       
+    }
+
+    subscribeToMessageChannel(){
+        if(!this.subscription){
+            this.subscription = subscribe(
+                this.messageContext,
+                updateXLineItems,
+                (message) => this.handleMessageFromLightningMessageService(message),
+                { scope: APPLICATION_SCOPE }
+            );
+        }
+    }
+
+    unsubscribeToMessageChannel(){
+        unsubscribe(this.subscription);
+        this.subscription = null;
+    }
+    
+    handleMessageFromLightningMessageService(message){
+        this.isLoading = true;
+        this.updateCauseByLightningMessageService = true;
+        this.refreshTableAndPage();
     }
 
     sortBy(field, reverse, primer) {

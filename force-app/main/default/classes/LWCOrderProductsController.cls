@@ -4,7 +4,7 @@ public with sharing class LWCOrderProductsController {
     public static List<LWCDatatableDataWrapper> getXLineItems(String parentName, String parentId){
         List<LWCDatatableDataWrapper> currentXLineItems = new List<LWCDatatableDataWrapper>();
 
-        String selectQuery = 'SELECT Id, Product2.Name, Product2Id, UnitPrice, Quantity, TotalPrice ';
+        String selectQuery = 'SELECT Id, Product2.Name, Product2Id,PricebookEntry.Pricebook2Id, PricebookEntry.Pricebook2.Name ,UnitPrice, Quantity, TotalPrice ';
         String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentName);
         String whereQuery = ' WHERE ' + parentName + 'Id=\'' + parentId + '\'';   
 
@@ -15,9 +15,11 @@ public with sharing class LWCOrderProductsController {
                 (String)xli.getSObject('Product2').get('Name'),
                 (Decimal)xli.get('UnitPrice'),
                 (Decimal)xli.get('Quantity'),
-                (Decimal)xli.get('TotalPrice')   
+                (Decimal)xli.get('TotalPrice')
             ));
         }
+
+        KProjectDebugging.printDebug('currentXLineItems', currentXLineItems);
 
         return currentXLineItems;
     }
@@ -54,14 +56,13 @@ public with sharing class LWCOrderProductsController {
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal quantity;
         @AuraEnabled public Decimal totalPrice;
-        public LWCDatatableDataWrapper( String xliId, String productId, String productName, Decimal UnitPrice, Decimal Quantity, Decimal TotalPrice){
+        public LWCDatatableDataWrapper(String xliId, String productId, String productName, Decimal UnitPrice, Decimal Quantity, Decimal TotalPrice){
             this.xliId = xliId;
             this.productId = productId;
             this.productName = productName;
             this.unitPrice = UnitPrice;
             this.quantity = Quantity;
             this.totalPrice = TotalPrice;
-            
         }
     }
 }

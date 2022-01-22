@@ -1,7 +1,30 @@
 public with sharing class LWCAvailableProductsController {
 
     @AuraEnabled
-    public static List<LWCComboBoxPricebookWrapper> getAllPricebooks(String recordId, String parentName){
+    public static PricebookResponseWrapper prepareComponentBasedOnPricebook(String parentName, String parentId){
+        String subQueryObject = Constants.PARENT_XLINEITEMCHILD.get(parentName) + 's';
+
+        String selectQuery = 'SELECT Pricebook2Id, Pricebook2.Name ';
+        String selectSubQuery = ', (SELECT Id FROM ' + subQueryObject + ') ';
+        String fromQuery = 'FROM ' + parentName;
+        String whereQuery = ' WHERE Id=\'' + parentId + '\'';
+        SObject parentAndLineItems = Database.query(selectQuery + selectSubQuery + fromQuery + whereQuery);
+        
+        if(parentAndLineItems.getSObjects(subQueryObject) == null){
+            return new PricebookResponseWrapper(true, getAllPricebooks());
+        } 
+
+        return new PricebookResponseWrapper(
+            false, 
+            new List<LWCComboBoxPricebookWrapper>{
+                new LWCComboBoxPricebookWrapper(
+                    (String)parentAndLineItems.getSObject('Pricebook2').get('Name'), 
+                    (String)parentAndLineItems.get('Pricebook2Id'))
+            });
+    }
+
+    @AuraEnabled
+    public static List<LWCComboBoxPricebookWrapper> getAllPricebooks(){
         List<LWCComboBoxPricebookWrapper> allPricebooks = new List<LWCComboBoxPricebookWrapper>();
 
         for(Pricebook2 pricebook: [
@@ -100,6 +123,15 @@ public with sharing class LWCAvailableProductsController {
             this.pricebookEntryId = pricebookEntryId;
             this.productName = productName;
             this.unitPrice = unitPrice;
+        }
+    }
+
+    public class PricebookResponseWrapper{
+        @AuraEnabled public Boolean canChange;
+        @AuraEnabled public List<LWCComboBoxPricebookWrapper> pricebooks;
+        public PricebookResponseWrapper(Boolean canChange,List<LWCComboBoxPricebookWrapper> pricebooks){
+            this.canChange = canChange;
+            this.pricebooks = pricebooks;
         }
     }
 

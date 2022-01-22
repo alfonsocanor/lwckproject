@@ -1,17 +1,12 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import getAllPricebooks from '@salesforce/apex/LWCAvailableProductsController.getAllPricebooks';
+import prepareComponentBasedOnPricebook from '@salesforce/apex/LWCAvailableProductsController.prepareComponentBasedOnPricebook';
 import getAvailableProducts from '@salesforce/apex/LWCAvailableProductsController.getAvailableProducts';
 import addProductLineItems from '@salesforce/apex/LWCAvailableProductsController.addProductLineItems';
 import setPricebookOnParent from '@salesforce/apex/LWCAvailableProductsController.setPricebookOnParent';
 
 import {
-    APPLICATION_SCOPE,
-    createMessageContext,
     MessageContext,
     publish,
-    releaseMessageContext,
-    subscribe,
-    unsubscribe,
 } from 'lightning/messageService';
 import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
 
@@ -33,23 +28,42 @@ export default class LwcAvailableProducts extends LightningElement {
     @track data = [];
     columns = columns;
     renderDatatable = false;
+    isLoading = true;
 
     sortDirection = 'asc';
     sortedBy;
 
     @track options;
     value = '';
+    readOnlyPricebook = false;
+
+    @wire(MessageContext)
+    messageContext;
 
     connectedCallback(){
-        console.log('cC ' + this.recordId);
-        console.log('this.parentName  ' + this.parentName);
-        this.getAllPricebooksFromApex();
+        console.log('here connected');
+        this.prepareComponentBasedOnPricebookFromApex();
     }
 
-    getAllPricebooksFromApex(){
-        getAllPricebooks()
-        .then(pricebooks => {
-            this.options = pricebooks;
+    prepareComponentBasedOnPricebookFromApex(){
+        prepareComponentBasedOnPricebook(
+            {
+                parentName: this.parentName,
+                parentId: this.recordId
+            }
+        )
+        .then(response => {
+            console.log(response);
+            if(response.canChange){
+                this.options = response.pricebooks;
+                this.isLoading = false;
+            } else {
+                this.readOnlyPricebook = true;
+                this.options = response.pricebooks;
+                this.value = response.pricebooks[0].value;
+                this.getAvailableProductsFromApex(response.pricebooks[0].value);
+            }
+            
         })
         .catch(error => {
             console.log('error', error);
@@ -57,6 +71,7 @@ export default class LwcAvailableProducts extends LightningElement {
     }
 
     handleComboboxPricebook(event){
+        this.isLoading = true;
         let pricebookId = event.target.value;
         this.getAvailableProductsFromApex(pricebookId);
         this.setPricebookOnParentFromApex(pricebookId);
@@ -66,6 +81,7 @@ export default class LwcAvailableProducts extends LightningElement {
         getAvailableProducts({pricebookId})
         .then(data => {
             this.data = data;
+            this.isLoading = false;
             this.renderDatatable = true;
         })
         .catch(error => {
@@ -78,13 +94,11 @@ export default class LwcAvailableProducts extends LightningElement {
     }
 
     setPricebookOnParentFromApex(pricebookId){
-        setPricebookOnParent(
-            {
-                recordId: this.recordId,
-                parentName: this.parentName,
-                pricebookId
-            }
-        )
+        setPricebookOnParent({
+            recordId: this.recordId,
+            parentName: this.parentName,
+            pricebookId
+        })
         .then(() => {
             //NoActions2Take - Pricebook saved
         })
@@ -97,7 +111,7 @@ export default class LwcAvailableProducts extends LightningElement {
             pricebookEntryId
         })
         .then(() => {
-            console.log('sendEventToTheOtherComponent');
+            publish(this.messageContext, updateXLineItems, { message: 'update table...' });
         })
         .catch(error => {
             console.log('error', error);

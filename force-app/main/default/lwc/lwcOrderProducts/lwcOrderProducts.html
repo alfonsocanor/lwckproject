@@ -1,13 +1,26 @@
 <template>
-    <div style="height: 300px;">
-        <lightning-datatable
-                key-field="xliId"
-                data={data}
-                columns={columns}
-                sorted-by={sortedBy}
-                onsort={onHandleSort}
-                onrowaction={handleRowAction}
-                hide-checkbox-column>
-        </lightning-datatable>
-    </div>  
+    <article class="slds-card">
+        <div style="max-height: 300px; text-align:center;">
+            <template if:true={isLoading}>
+                <div style="text-align:center;">
+                    <lightning-spinner alternative-text="Preparing" size="small"></lightning-spinner>
+                </div>
+            </template>
+            <div class="slds-card__body slds-card__body_inner">
+                <lightning-datatable
+                        key-field="xliId"
+                        data={data}
+                        columns={columns}
+                        sorted-by={sortedBy}
+                        onsort={onHandleSort}
+                        onrowaction={handleRowAction}
+                        class="slds-scrollable_y"
+                        hide-checkbox-column>
+                </lightning-datatable>
+                <template if:true={noXli}>
+                    <span>{noProductsMessage}</span>
+                </template> 
+            </div>
+        </div>  
+    </article>
 </template>
