@@ -1,12 +1,12 @@
 public with sharing class LWCOrderProductsController {
 
     @AuraEnabled
-    public static List<LWCDatatableDataWrapper> getXLineItems(String parentObject, String parentId){
+    public static List<LWCDatatableDataWrapper> getXLineItems(String parentName, String parentId){
         List<LWCDatatableDataWrapper> currentXLineItems = new List<LWCDatatableDataWrapper>();
 
         String selectQuery = 'SELECT Id, Product2.Name, Product2Id, UnitPrice, Quantity, TotalPrice ';
-        String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentObject);
-        String whereQuery = ' WHERE ' + parentObject + 'Id=\'' + parentId + '\'';   
+        String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentName);
+        String whereQuery = ' WHERE ' + parentName + 'Id=\'' + parentId + '\'';   
 
         for(SObject xli: Database.query(selectQuery + fromQuery + whereQuery)){
             currentXLineItems.add(new LWCDatatableDataWrapper(
@@ -23,9 +23,9 @@ public with sharing class LWCOrderProductsController {
     }
 
     @AuraEnabled
-    public static void handleXLineItemUpdate(String parentObject, String xliId){
+    public static void handleXLineItemUpdate(String parentName, String xliId){
         String selectQuery = 'SELECT Id, Quantity ';
-        String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentObject);
+        String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentName);
         String whereQuery = ' WHERE Id=\'' + xliId + '\'';  
 
         SObject xLineItem = Database.query(selectQuery + fromQuery + whereQuery);
@@ -54,7 +54,7 @@ public with sharing class LWCOrderProductsController {
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal quantity;
         @AuraEnabled public Decimal totalPrice;
-        public LWCDatatableDataWrapper( String xliId, String productName, String productId, Decimal UnitPrice, Decimal Quantity, Decimal TotalPrice){
+        public LWCDatatableDataWrapper( String xliId, String productId, String productName, Decimal UnitPrice, Decimal Quantity, Decimal TotalPrice){
             this.xliId = xliId;
             this.productId = productId;
             this.productName = productName;
