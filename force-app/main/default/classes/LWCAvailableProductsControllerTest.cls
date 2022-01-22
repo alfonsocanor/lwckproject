@@ -2,10 +2,46 @@
 private with sharing class LWCAvailableProductsControllerTest {
     
     @isTest
-    static void retrieveProductsBasedOnPricebookWithPricebookEntryActive(){}
+    static void retrieveProductsBasedOnPricebookWithPricebookEntryActive(){
+        Test.startTest();
+            List<Product2> availableProductPerPricebookList = 
+                LWCAvailableProductsController.getAvailableProducts(stdPricebook.Id);
+        Test.stopTest();
+
+        System.assertEquals(3, availableProductPerPricebookList.size());
+    }
 
     @isTest
-    static void addProductToTheLineItemsOfTheProduct(){}
+    static void addProductToTheLineItemsOfTheProductIfTheProductDoesNotExistInTheLineItemAndAssignQuantityEqualsToOne(){
+        Test.startTest();
+            LWCAvailableProductsController.addProductLineItems(ord.Id, p2.Id);
+        Test.stopTest();
+
+        OrderItem oliAddedP2 = [
+            SELECT Quantity
+            FROM OrderItem
+            WHERE orderId = :ord.Id 
+                AND Product2Id = :p2.Id
+        ]; 
+
+        System.assertEquals(1, oliAddedP2.Quantity);
+    }
+
+    @isTest
+    static void increaseInOneTheQuantityIfTheProductAlreadyExistInTheLineItems(){
+        Test.startTest();
+            LWCAvailableProductsController.addProductLineItems(ord.Id, p1.Id);
+        Test.stopTest();
+
+        OrderItem oliUpdateQuantityP1 = [
+            SELECT Quantity
+            FROM OrderItem
+            WHERE orderId = :ord.Id 
+                AND Product2Id = :p1.Id
+        ]; 
+
+        System.assertEquals(2, oliUpdateQuantityP1.Quantity);
+    }
 
     @isTest
     static void rejectAddProductIfStatusOfTheOrderIsActived(){}
@@ -13,14 +49,9 @@ private with sharing class LWCAvailableProductsControllerTest {
     @isTest 
     static void sortProductsAtTheTopIfTheOrderContainsLineItems(){}
 
-    @isTest
-    static void addProductWithQuantityOneIfTheProductDoesNotExistInTheLineItems(){}
-
-    @isTest
-    static void increaseInOneTheQuantityIfTheProductAlreadyExistInTheLineItems(){}
-
     static Account acc;
     static Order ord;
+    static OrderItem oli1;
     static Product2 p1, p2, p3, p4;
     static Pricebook2 stdPricebook;
     static PricebookEntry pbeStd1, pbeStd2, pbeStd3, pbeStd4NotActive;
@@ -95,5 +126,15 @@ private with sharing class LWCAvailableProductsControllerTest {
             .build();
         
         insert ord;
+
+        oli1 = Builder.anOrderItem()
+            .setOrder(ord)
+            .setProduct(p1)
+            .setPricebookEntry(pbeStd1)
+            .setQuantity(1)
+            .setUnitPrice(10)
+            .build();
+
+        insert oli1;
     }
 }
