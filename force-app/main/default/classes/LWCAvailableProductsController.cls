@@ -23,27 +23,41 @@ public with sharing class LWCAvailableProductsController {
             pricebookEntryPerXLineItemMap.put((String)xli.get('PricebookEntryId'), (SObject)xli);
         }
 
-        SObject upsertXLineItem = Schema.getGlobalDescribe().get(Constants.PARENT_XLINEITEMCHILD.get(parentObject)).newSObject();
+        SObject cuXLineItem = Schema.getGlobalDescribe().get(Constants.PARENT_XLINEITEMCHILD.get(parentObject)).newSObject();
         if(pricebookEntryPerXLineItemMap.containsKey(pricebookEntryId)){
-            upsertXLineItem = pricebookEntryPerXLineItemMap.get(pricebookEntryId);
-            Decimal currentQuantity = (Decimal)upsertXLineItem.get('Quantity');
-            currentQuantity++;
-            upsertXLineItem.put('Quantity', currentQuantity);
+            cuXLineItem = pricebookEntryPerXLineItemMap.get(pricebookEntryId);
+            updateXLineItem('increaseQuantity', cuXLineItem);
         } else {
-            PricebookEntry pbeInfo = [
-                SELECT Id, Product2Id, UnitPrice
-                FROM PricebookEntry
-                WHERE Id = :pricebookEntryId
-            ];
-            upsertXLineItem.put('PricebookEntryId', pbeInfo.Id);
-            upsertXLineItem.put('Product2Id', pbeInfo.Product2Id);
-            upsertXLineItem.put('UnitPrice', pbeInfo.UnitPrice);
-            upsertXLineItem.put(parentObject + 'Id', parentId); //Ex: Order + Id = OrderId
-            upsertXLineItem.put('Quantity', 1);
+            createXLineItem(cuXLineItem, pricebookEntryId, parentObject, parentId);
         }
 
-        KProjectDebugging.printDebug('upsertXLineItem', upsertXLineItem);
-        
-        upsert upsertXLineItem;
+        KProjectDebugging.printDebug('upsertXLineItem', cuXLineItem);
+
+        upsert cuXLineItem;
+    }
+
+    public static void updateXLineItem(String action, SObject xLineItem){
+        if(action == 'increaseQuantity'){
+            increaseXLineItemQuantity(xLineItem);
+        }
+    }
+
+    public static void createXLineItem(SObject xLineItem, String pricebookEntryId, String parentObject, String parentId){
+        PricebookEntry pbeInfo = [
+            SELECT Id, Product2Id, UnitPrice
+            FROM PricebookEntry
+            WHERE Id = :pricebookEntryId
+        ];
+        xLineItem.put('PricebookEntryId', pbeInfo.Id);
+        xLineItem.put('Product2Id', pbeInfo.Product2Id);
+        xLineItem.put('UnitPrice', pbeInfo.UnitPrice);
+        xLineItem.put(parentObject + 'Id', parentId); //Ex: Order + Id = OrderId
+        xLineItem.put('Quantity', 1);
+    }
+
+    public static void increaseXLineItemQuantity(SObject xLineItem){
+        Decimal currentQuantity = (Decimal)xLineItem.get('Quantity');
+        currentQuantity++;
+        xLineItem.put('Quantity', currentQuantity);
     }
 }
