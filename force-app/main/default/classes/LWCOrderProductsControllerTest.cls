@@ -3,7 +3,8 @@ private with sharing class LWCOrderProductsControllerTest {
     @isTest
     static void retrieveAllTheCurrentLineItems(){
         Test.startTest();
-            List<Order> allCurrentLineItems = LWCOrderProductsController.getXLineItems(ord.Id);
+            List<LWCOrderProductsController.LWCDatatableDataWrapper> allCurrentLineItems = 
+                LWCOrderProductsController.getXLineItems('Order', ord.Id);
         Test.stopTest();
 
         System.assertEquals(3, allCurrentLineItems.size());
@@ -12,7 +13,7 @@ private with sharing class LWCOrderProductsControllerTest {
     @isTest
     static void deleteTheLineItemIfTheQuantityIsOnlyOne(){
         Test.startTest();
-            LWCOrderProductsController.handleXLineItemUpdate(pbeStd1.Id);
+            LWCOrderProductsController.handleXLineItemUpdate('Order', oli1.Id);
         Test.stopTest();
 
         List<OrderItem> orderItemsAfterDelete = [
@@ -27,7 +28,7 @@ private with sharing class LWCOrderProductsControllerTest {
     @isTest
     static void decreaseTheQuantityIfTheQuantityIsGreatherThatOne(){
         Test.startTest();
-            LWCOrderProductsController.handleXLineItemUpdate(oli2.Id);
+            LWCOrderProductsController.handleXLineItemUpdate('Order', oli2.Id);
         Test.stopTest();
 
         OrderItem orderItemsAfterDelete = [
