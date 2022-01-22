@@ -14,7 +14,8 @@ const columns = [
     { label: 'Product', type: 'String', fieldName: 'productName', sortable:true},
     { label: 'Unit Price', type: 'currency', fieldName: 'unitPrice', sortable:true},
     { label: 'Quantity', type: 'number', fieldName: 'quantity', sortable:true},
-    { label: 'Total Price', type: 'currency', fieldName: 'TotalPrice', sortable:true}
+    { label: 'Total Price', type: 'currency', fieldName: 'TotalPrice', sortable:true},
+    { label: '',title:'title', name:'name', type: 'button'}
 ];
 
 export default class LwcOrderProducts extends LightningElement {

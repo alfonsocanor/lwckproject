@@ -12,7 +12,8 @@ import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
 
 const columns = [
     { label: 'Product', type: 'String', fieldName: 'productName', sortable:true},
-    { label: 'Price List', type: 'currency', fieldName: 'unitPrice', sortable:true}
+    { label: 'Price List', type: 'currency', fieldName: 'unitPrice', sortable:true},
+    { label: '',title:'title', name:'name', type: 'button'}
 ];
 
 export default class LwcAvailableProducts extends LightningElement {
