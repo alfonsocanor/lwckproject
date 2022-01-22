@@ -1,29 +1,27 @@
 @isTest
-private with sharing class LWCAvailableProductsControllerTest {
+private with sharing class LWCOrderProductsController {
+
+    @isTest
+    static void retrieveAllTheCurrentLineItems(){}
     
     @isTest
-    static void retrieveProductsBasedOnPricebookWithPricebookEntryActive(){}
+    static void deleteTheLineItemIfTheQuantityIsOnlyOne(){}
 
     @isTest
-    static void addProductToTheLineItemsOfTheProduct(){}
+    static void decreaseTheQuantityIfTheQuantityIsGreatherThatOne(){}
 
     @isTest
-    static void rejectAddProductIfStatusOfTheOrderIsActived(){}
-
-    @isTest 
-    static void sortProductsAtTheTopIfTheOrderContainsLineItems(){}
+    static void updateOrderTheStatusOfTheOrderToActivated(){}
 
     @isTest
-    static void addProductWithQuantityOneIfTheProductDoesNotExistInTheLineItems(){}
-
-    @isTest
-    static void increaseInOneTheQuantityIfTheProductAlreadyExistInTheLineItems(){}
+    static void rejectUpdateOrderIfStatusOfTheOrderIsAlreadyActived(){}
 
     static Account acc;
     static Order ord;
+    static OrderItem oli1, oli2, oli3;
     static Product2 p1, p2, p3, p4;
     static Pricebook2 stdPricebook;
-    static PricebookEntry pbeStd1, pbeStd2, pbeStd3, pbeStd4NotActive;
+    static PricebookEntry pbeStd1, pbeStd2, pbeStd3;
     static{
         stdPricebook = Builder.aPricebook()
             .setIdIfStandard(Test.getStandardPricebookId())
@@ -71,14 +69,7 @@ private with sharing class LWCAvailableProductsControllerTest {
             .setUnitPrice(10)
             .build();
 
-        pbeStd4NotActive =  Builder.aPricebookEntry()
-            .setIsActive(false)
-            .setProduct(p4)
-            .setPricebook(stdPricebook)
-            .setUnitPrice(10)
-            .build();
-
-        insert new List<PricebookEntry>{pbeStd1, pbeStd2, pbeStd3, pbeStd4NotActive};
+        insert new List<PricebookEntry>{pbeStd1, pbeStd2, pbeStd3};
 
         acc = Builder.anAccount()
             .setName('Test Account')
@@ -90,10 +81,36 @@ private with sharing class LWCAvailableProductsControllerTest {
             .setName('Test Order')
             .setAccount(acc)
             .setOrderStartDate(Date.today())
-            .setPricebook(stdPricebook)
             .setStatus('Draft')
+            .setPricebook(stdPricebook)
             .build();
         
         insert ord;
+
+        oli1 = Builder.anOrderItem()
+            .setOrder(ord)
+            .setProduct(p1)
+            .setPricebookEntry(pbeStd1)
+            .setQuantity(1)
+            .setUnitPrice(10)
+            .build();
+
+        oli2 = Builder.anOrderItem()
+            .setOrder(ord)
+            .setProduct(p2)
+            .setPricebookEntry(pbeStd2)
+            .setQuantity(1)
+            .setUnitPrice(10)
+            .build();
+
+        oli3 = Builder.anOrderItem()
+            .setOrder(ord)
+            .setProduct(p3)
+            .setPricebookEntry(pbeStd1)
+            .setQuantity(1)
+            .setUnitPrice(10)
+            .build();
+
+        insert new List<OrderItem>{oli1, oli2, oli3};
     }
 }

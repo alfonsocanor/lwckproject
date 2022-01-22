@@ -38,6 +38,11 @@ public with sharing class Builder {
             return this;
         }
 
+        public OrderBuilder setPricebook(Pricebook2 pricebook){
+            ord.Pricebook2Id = pricebook.Id;
+            return this;
+        }
+
         public Order build(){
             return ord;
         }
@@ -79,4 +84,75 @@ public with sharing class Builder {
     }
 
     public static OrderItemBuilder anOrderItem(){return new OrderItemBuilder();}
+
+    public class PricebookBuilder{
+        private Pricebook2 pb = new Pricebook2();
+
+        public PricebookBuilder setName(String name){
+            pb.Name = name;
+            return this;
+        }
+
+        public PricebookBuilder setIdIfStandard(Id standardPricebookId){
+            pb.Id = standardPricebookId;
+            return this;
+        }
+
+        public PricebookBuilder setIsActive(Boolean isActive){
+            pb.IsActive = isActive;
+            return this;
+        }
+
+        public Pricebook2 build(){
+            return pb;
+        }
+    }
+
+    public static PricebookBuilder aPricebook(){return new PricebookBuilder();}
+
+    public class PricebookEntryBuilder{
+
+        private PricebookEntry pbe = new PricebookEntry();
+
+        public PricebookEntryBuilder setProduct(Product2 product){
+            pbe.Product2Id = product.Id;
+            return this;
+        }
+
+        public PricebookEntryBuilder setPricebook(Pricebook2 pricebook){
+            pbe.Pricebook2Id = pricebook.Id;
+            return this;
+        }
+
+        public PricebookEntryBuilder setUnitPrice(Decimal unitPrice){
+            pbe.UnitPrice = unitPrice;
+            return this;
+        }
+
+        public PricebookEntryBuilder setIsActive(Boolean isActive){
+            pbe.IsActive = isActive;
+            return this;
+        }
+
+        public PricebookEntry build(){
+            return pbe;
+        }
+    }
+
+    public static PricebookEntryBuilder aPricebookEntry(){return new PricebookEntryBuilder();}
+
+    public class AccountBuilder{
+        private Account acc = new Account();
+
+        public AccountBuilder setName(String name){
+            acc.Name = name;
+            return this;
+        }
+
+        public Account build(){
+            return acc;
+        }
+    }
+
+    public static AccountBuilder anAccount(){return new AccountBuilder();}
 }
