@@ -1,6 +1,8 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import getAllPricebooks from '@salesforce/apex/LWCAvailableProductsController.getAllPricebooks';
 import getAvailableProducts from '@salesforce/apex/LWCAvailableProductsController.getAvailableProducts';
+import addProductLineItems from '@salesforce/apex/LWCAvailableProductsController.addProductLineItems';
+import setPricebookOnParent from '@salesforce/apex/LWCAvailableProductsController.setPricebookOnParent';
 
 import {
     APPLICATION_SCOPE,
@@ -13,10 +15,16 @@ import {
 } from 'lightning/messageService';
 import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
 
+
 const columns = [
     { label: 'Product', type: 'String', fieldName: 'productName', sortable:true},
-    { label: 'Price List', type: 'currency', fieldName: 'unitPrice', sortable:true},
-    { label: '', type: 'button', typeAttributes: { label: 'Add',}}
+    { label: 'Price List', type: 'currency', fieldName: 'unitPrice', sortable:true,
+        cellAttributes: { class: 'slds-text-align_right'}
+    },
+    { label: '', name: 'add', type: 'button', 
+        typeAttributes: { label: 'Add'},
+        cellAttributes: { class: 'slds-align_absolute-center'}
+    }
 ];
 
 export default class LwcAvailableProducts extends LightningElement {
@@ -24,6 +32,7 @@ export default class LwcAvailableProducts extends LightningElement {
     @api parentName;
     @track data = [];
     columns = columns;
+    renderDatatable = false;
 
     sortDirection = 'asc';
     sortedBy;
@@ -48,13 +57,47 @@ export default class LwcAvailableProducts extends LightningElement {
     }
 
     handleComboboxPricebook(event){
-        this.getAvailableProductsFromApex(event.target.value);
+        let pricebookId = event.target.value;
+        this.getAvailableProductsFromApex(pricebookId);
+        this.setPricebookOnParentFromApex(pricebookId);
     }
 
     getAvailableProductsFromApex(pricebookId){
         getAvailableProducts({pricebookId})
         .then(data => {
             this.data = data;
+            this.renderDatatable = true;
+        })
+        .catch(error => {
+            console.log('error', error);
+        })
+    }
+
+    handleRowAction(event){
+        this.addProductLineItemsFromApex(event.detail.row.pricebookEntryId);
+    }
+
+    setPricebookOnParentFromApex(pricebookId){
+        setPricebookOnParent(
+            {
+                recordId: this.recordId,
+                parentName: this.parentName,
+                pricebookId
+            }
+        )
+        .then(() => {
+            //NoActions2Take - Pricebook saved
+        })
+    }
+
+    addProductLineItemsFromApex(pricebookEntryId){
+        addProductLineItems({
+            parentName: this.parentName,
+            parentId: this.recordId,
+            pricebookEntryId
+        })
+        .then(() => {
+            console.log('sendEventToTheOtherComponent');
         })
         .catch(error => {
             console.log('error', error);

@@ -1,21 +1,29 @@
 <template>
-    <lightning-input type="text" label="Price book" value={pricebookEntry}></lightning-input>
-    <lightning-combobox
-            required
-            label="To process"
-            value={value}
-            options={options}
-            class="slds-col slds-size_1-of-8 slds-m-left_medium dateShippedInputs"
-            onchange={handleComboboxPricebook}>
-    </lightning-combobox>
-    <div style="height: 300px;">
-        <lightning-datatable
-            key-field="pricebookEntryId"
-            data={data}
-            columns={columns}
-            sorted-by={sortedBy}
-            onsort={onHandleSort}
-            onrowaction={handleRowAction}>
-        </lightning-datatable>
-    </div>  
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <lightning-combobox
+                required
+                label="Select Pricebook"
+                value={value}
+                options={options}
+                onchange={handleComboboxPricebook}>
+            </lightning-combobox>
+          </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+            <template if:true={renderDatatable}>
+                <div style="height: 300px;">
+                    <lightning-datatable
+                        key-field="pricebookEntryId"
+                        data={data}
+                        columns={columns}
+                        sorted-by={sortedBy}
+                        onsort={onHandleSort}
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </div> 
+            </template>
+        </div>
+    </article>  
 </template>

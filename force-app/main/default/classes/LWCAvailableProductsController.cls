@@ -15,6 +15,15 @@ public with sharing class LWCAvailableProductsController {
     }
 
     @AuraEnabled
+    public static void setPricebookOnParent(String recordId,String parentName, String pricebookId){
+        SObject xliParent = Schema.getGlobalDescribe().get(parentName).newSObject();
+        xliParent.put('Id', recordId);
+        xliParent.put('Pricebook2Id', pricebookId);
+
+        update xliParent;
+    }
+
+    @AuraEnabled
     public static List<LWCDatatableDataWrapper> getAvailableProducts(String pricebookId){
         List<LWCDatatableDataWrapper> productAvailableList = new List<LWCDatatableDataWrapper>();
 
@@ -32,25 +41,25 @@ public with sharing class LWCAvailableProductsController {
     }
 
     @AuraEnabled
-    public static void addProductLineItems(String parentObject, String parentId, String pricebookEntryId){
+    public static void addProductLineItems(String parentName, String parentId, String pricebookEntryId){
         List<OrderItem> orderItem2Insert = new List<OrderItem>();
         List<OrderItem> orderItem2Update = new List<OrderItem>();
         Map<String, SObject> pricebookEntryPerXLineItemMap = new Map<String, SObject>();
 
         String selectQuery = 'SELECT Id, PricebookEntryId, Quantity ';
-        String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentObject);
-        String whereQuery = ' WHERE ' + parentObject + 'Id=\'' + parentId + '\'';
+        String fromQuery = 'FROM ' + Constants.PARENT_XLINEITEMCHILD.get(parentName);
+        String whereQuery = ' WHERE ' + parentName + 'Id=\'' + parentId + '\'';
 
         for(SObject xli: Database.query(selectQuery + fromQuery + whereQuery)){
             pricebookEntryPerXLineItemMap.put((String)xli.get('PricebookEntryId'), (SObject)xli);
         }
 
-        SObject cuXLineItem = Schema.getGlobalDescribe().get(Constants.PARENT_XLINEITEMCHILD.get(parentObject)).newSObject();
+        SObject cuXLineItem = Schema.getGlobalDescribe().get(Constants.PARENT_XLINEITEMCHILD.get(parentName)).newSObject();
         if(pricebookEntryPerXLineItemMap.containsKey(pricebookEntryId)){
             cuXLineItem = pricebookEntryPerXLineItemMap.get(pricebookEntryId);
             updateXLineItem('increaseQuantity', cuXLineItem);
         } else {
-            createXLineItem(cuXLineItem, pricebookEntryId, parentObject, parentId);
+            createXLineItem(cuXLineItem, pricebookEntryId, parentName, parentId);
         }
 
         KProjectDebugging.printDebug('upsertXLineItem', cuXLineItem);
@@ -64,7 +73,7 @@ public with sharing class LWCAvailableProductsController {
         }
     }
 
-    public static void createXLineItem(SObject xLineItem, String pricebookEntryId, String parentObject, String parentId){
+    public static void createXLineItem(SObject xLineItem, String pricebookEntryId, String parentName, String parentId){
         PricebookEntry pbeInfo = [
             SELECT Id, Product2Id, UnitPrice
             FROM PricebookEntry
@@ -73,7 +82,7 @@ public with sharing class LWCAvailableProductsController {
         xLineItem.put('PricebookEntryId', pbeInfo.Id);
         xLineItem.put('Product2Id', pbeInfo.Product2Id);
         xLineItem.put('UnitPrice', pbeInfo.UnitPrice);
-        xLineItem.put(parentObject + 'Id', parentId); //Ex: Order + Id = OrderId
+        xLineItem.put(parentName + 'Id', parentId); //Ex: Order + Id = OrderId
         xLineItem.put('Quantity', 1);
     }
 
