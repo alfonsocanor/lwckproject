@@ -1,3 +1,11 @@
 <template>
-    
+    <div style="height: 300px;">
+        <lightning-datatable
+                key-field="xliId"
+                data={data}
+                columns={columns}
+                sorted-by={sortedBy}
+                onsort={onHandleSort}>
+        </lightning-datatable>
+    </div>  
 </template>

@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>52.0</apiVersion>
-    <isExposed>false</isExposed>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage, lightning__RecordPage">
+            <property name="parentName" type="String" datasource="Order,Opportunity,Quote" placeholder="Select Object" required="true"></property>
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>

@@ -4,7 +4,7 @@ private with sharing class LWCAvailableProductsControllerTest {
     @isTest
     static void retrieveProductsBasedOnPricebookWithPricebookEntryActive(){
         Test.startTest();
-            List<PricebookEntry> availableProductPerPricebookList = 
+            List<LWCAvailableProductsController.LWCDatatableDataWrapper> availableProductPerPricebookList = 
                 LWCAvailableProductsController.getAvailableProducts(stdPricebook.Id);
         Test.stopTest();
 

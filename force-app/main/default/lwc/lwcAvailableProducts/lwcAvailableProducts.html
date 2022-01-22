@@ -2,9 +2,11 @@
     <lightning-input type="text" label="Price book" value={pricebookEntry}></lightning-input>
     <div style="height: 300px;">
         <lightning-datatable
-                key-field="id"
-                data={data}
-                columns={columns}>
+            key-field="pricebookEntryId"
+            data={data}
+            columns={columns}
+            sorted-by={sortedBy}
+            onsort={onHandleSort}>
         </lightning-datatable>
     </div>  
 </template>

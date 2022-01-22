@@ -1,12 +1,20 @@
 public with sharing class LWCAvailableProductsController {
 
     @AuraEnabled
-    public static List<PricebookEntry> getAvailableProducts(String pricebookId){
-        return [
+    public static List<LWCDatatableDataWrapper> getAvailableProducts(String pricebookId){
+        List<LWCDatatableDataWrapper> productAvailableList = new List<LWCDatatableDataWrapper>();
+
+        for(PricebookEntry pbe:[
             SELECT Id, Product2.Name, UnitPrice
             FROM PricebookEntry
             WHERE Pricebook2Id = :pricebookId AND IsActive = true
-        ];
+        ]){
+            productAvailableList.add(new LWCDatatableDataWrapper(
+                pbe.Id, pbe.Product2.Name, pbe.UnitPrice
+            ));
+        }
+
+        return productAvailableList;
     }
 
     @AuraEnabled
@@ -59,5 +67,16 @@ public with sharing class LWCAvailableProductsController {
         Decimal currentQuantity = (Decimal)xLineItem.get('Quantity');
         currentQuantity++;
         xLineItem.put('Quantity', currentQuantity);
+    }
+
+    public class LWCDatatableDataWrapper{
+        @AuraEnabled public String pricebookEntryId;
+        @AuraEnabled public String productName;
+        @AuraEnabled public Decimal unitPrice;
+        public LWCDatatableDataWrapper(String pricebookEntryId, String productName, Decimal unitPrice){
+            this.pricebookEntryId = pricebookEntryId;
+            this.productName = productName;
+            this.unitPrice = unitPrice;
+        }
     }
 }
