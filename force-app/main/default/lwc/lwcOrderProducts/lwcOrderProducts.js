@@ -8,9 +8,11 @@ import {
     MessageContext,
     subscribe,
     unsubscribe,
+    publish
 } from 'lightning/messageService';
 
 import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
+import updatePricebookOptions from '@salesforce/messageChannel/UpdatePricebookOptions__c';
 
 const columns = [
     { label: 'Product', type: 'String', fieldName: 'productName', sortable:true},
@@ -36,7 +38,7 @@ export default class LwcOrderProducts extends LightningElement {
     columns = columns;
     isLoading = false;
 
-    updateCauseByLightningMessageService = false;
+    updateFromXliDelete = false;
 
     @wire(MessageContext)
     messageContext;
@@ -58,6 +60,12 @@ export default class LwcOrderProducts extends LightningElement {
         .then(data => {
             this.isLoading = false;
             this.data = data;
+
+            if(this.updateFromXliDelete && this.data.length === 0){
+                publish(this.messageContext, updatePricebookOptions, { message: 'update pricebook options...' });
+            }
+
+            this.updateFromXliDelete = false;
         })
         .catch(error => {
             console.log('error:', error);
@@ -76,6 +84,7 @@ export default class LwcOrderProducts extends LightningElement {
             xliId
         })
         .then(() => {
+            this.updateFromXliDelete = true;
             this.getXLineItemsFromApex();
         })
     }

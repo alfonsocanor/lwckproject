@@ -3,12 +3,17 @@ import prepareComponentBasedOnPricebook from '@salesforce/apex/LWCAvailableProdu
 import getAvailableProducts from '@salesforce/apex/LWCAvailableProductsController.getAvailableProducts';
 import addProductLineItems from '@salesforce/apex/LWCAvailableProductsController.addProductLineItems';
 import setPricebookOnParent from '@salesforce/apex/LWCAvailableProductsController.setPricebookOnParent';
+import getAllPricebooks from '@salesforce/apex/LWCAvailableProductsController.getAllPricebooks';
 
 import {
+    APPLICATION_SCOPE,
     MessageContext,
+    subscribe,
+    unsubscribe,
     publish,
 } from 'lightning/messageService';
 import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
+import updatePricebookOptions from '@salesforce/messageChannel/UpdatePricebookOptions__c';
 
 
 const columns = [
@@ -41,19 +46,19 @@ export default class LwcAvailableProducts extends LightningElement {
     messageContext;
 
     connectedCallback(){
-        console.log('here connected');
+        this.subscribeToMessageChannel();
         this.prepareComponentBasedOnPricebookFromApex();
     }
 
+    disconnectedCallback(){
+        this.unsubscribeToMessageChannel();
+    }
+
     prepareComponentBasedOnPricebookFromApex(){
-        prepareComponentBasedOnPricebook(
-            {
+        prepareComponentBasedOnPricebook({
                 parentName: this.parentName,
-                parentId: this.recordId
-            }
-        )
+                parentId: this.recordId})
         .then(response => {
-            console.log(response);
             if(response.canChange){
                 this.options = response.pricebooks;
                 this.isLoading = false;
@@ -90,6 +95,7 @@ export default class LwcAvailableProducts extends LightningElement {
     }
 
     handleRowAction(event){
+        this.isLoading = true;
         this.addProductLineItemsFromApex(event.detail.row.pricebookEntryId);
     }
 
@@ -111,11 +117,45 @@ export default class LwcAvailableProducts extends LightningElement {
             pricebookEntryId
         })
         .then(() => {
+            this.isLoading = false;
+            this.readOnlyPricebook = true;
             publish(this.messageContext, updateXLineItems, { message: 'update table...' });
         })
         .catch(error => {
             console.log('error', error);
         })
+    }
+
+    subscribeToMessageChannel(){
+        if(!this.subscription){
+            this.subscription = subscribe(
+                this.messageContext,
+                updatePricebookOptions,
+                (message) => this.handleMessageFromLightningMessageService(message),
+                { scope: APPLICATION_SCOPE }
+            );
+        }
+    }
+
+    unsubscribeToMessageChannel(){
+        unsubscribe(this.subscription);
+        this.subscription = null;
+    }
+
+    getAllPricebooksFromApex(){
+        getAllPricebooks({})
+        .then(pricebooks => {
+            this.options = pricebooks;
+        })
+    }
+    
+    handleMessageFromLightningMessageService(message){
+        this.isLoading = true;
+        this.readOnlyPricebook = false;
+        this.getAllPricebooksFromApex();
+        setTimeout(function(){
+            this.isLoading = false;
+        }.bind(this),1000);
     }
 
     sortBy(field, reverse, primer) {
