@@ -10,5 +10,4 @@ public with sharing class Constants {
         'Opportunity' => 'OpportunityLineItem',
         'Quote' => 'QuoteLineItem'
     };
-
 }

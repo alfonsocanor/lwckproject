@@ -12,7 +12,7 @@ import {
     unsubscribe,
     publish,
 } from 'lightning/messageService';
-import updateXLineItems from '@salesforce/messageChannel/UpdateXLineItems__c';
+import updateXLineItems from '@salesforce/messageChannel/updateXLineItems__c';
 import updatePricebookOptions from '@salesforce/messageChannel/UpdatePricebookOptions__c';
 
 

@@ -1,4 +1,3 @@
-
 @isTest
 private with sharing class LWCXLineItemsControllerTest {
     @isTest
@@ -236,4 +235,3 @@ private with sharing class LWCXLineItemsControllerTest {
         insert new List<OrderItem>{oli1, oli2, oli3};
     }
 }
-
