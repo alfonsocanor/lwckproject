@@ -1,4 +1,4 @@
-public with sharing class LWCOrderProductsController {
+public with sharing class LWCXLineItemsController {
 
     @AuraEnabled
     public static Boolean isStatusActivated(String parentName, String parentId){

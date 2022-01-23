@@ -1,10 +1,11 @@
+
 @isTest
-private with sharing class LWCOrderProductsControllerTest {
+private with sharing class LWCXLineItemsControllerTest {
     @isTest
     static void retrieveAllTheCurrentLineItems(){
         Test.startTest();
-            List<LWCOrderProductsController.LWCDatatableDataWrapper> allCurrentLineItems = 
-                LWCOrderProductsController.getXLineItems('Order', ord.Id);
+            List<LWCXLineItemsController.LWCDatatableDataWrapper> allCurrentLineItems = 
+                LWCXLineItemsController.getXLineItems('Order', ord.Id);
         Test.stopTest();
 
         System.assertEquals(3, allCurrentLineItems.size());
@@ -13,7 +14,7 @@ private with sharing class LWCOrderProductsControllerTest {
     @isTest
     static void deleteTheLineItemIfTheQuantityIsOnlyOne(){
         Test.startTest();
-            LWCOrderProductsController.handleXLineItemUpdate('Order', oli1.Id);
+            LWCXLineItemsController.handleXLineItemUpdate('Order', oli1.Id);
         Test.stopTest();
 
         List<OrderItem> orderItemsAfterDelete = [
@@ -28,7 +29,7 @@ private with sharing class LWCOrderProductsControllerTest {
     @isTest
     static void decreaseTheQuantityIfTheQuantityIsGreatherThatOne(){
         Test.startTest();
-            LWCOrderProductsController.handleXLineItemUpdate('Order', oli2.Id);
+            LWCXLineItemsController.handleXLineItemUpdate('Order', oli2.Id);
         Test.stopTest();
 
         OrderItem orderItemsAfterDelete = [
@@ -51,7 +52,7 @@ private with sharing class LWCOrderProductsControllerTest {
 
             System.assertNotEquals('Activated', ord.Status);
 
-            LWCOrderProductsController.activateParentObject('Order', ord.Id);
+            LWCXLineItemsController.activateParentObject('Order', ord.Id);
         Test.stopTest();
 
         Order ordAfterUpdate = [
@@ -74,7 +75,7 @@ private with sharing class LWCOrderProductsControllerTest {
 
             System.assertEquals(1, oliBeforeUpdate.Quantity);
 
-            LWCOrderProductsController.handleXLineItemUpdate('Order', oli1.Id);
+            LWCXLineItemsController.handleXLineItemUpdate('Order', oli1.Id);
         Test.stopTest();
 
         List<OrderItem> oliAfterUpdate = [
@@ -97,7 +98,7 @@ private with sharing class LWCOrderProductsControllerTest {
 
             System.assertEquals(3, oliBeforeUpdate.Quantity);
 
-            LWCOrderProductsController.handleXLineItemUpdate('Order', oli2.Id);
+            LWCXLineItemsController.handleXLineItemUpdate('Order', oli2.Id);
         Test.stopTest();
 
         OrderItem oliAfterUpdate = [
@@ -112,7 +113,7 @@ private with sharing class LWCOrderProductsControllerTest {
     @isTest
     static void returnFalseIfTheStatusOfTheRecordIsNotActivated(){
         Test.startTest();
-            Boolean isNotActivated = LWCOrderProductsController.isStatusActivated('Order',ord.Id);
+            Boolean isNotActivated = LWCXLineItemsController.isStatusActivated('Order',ord.Id);
         Test.stopTest();
 
         System.assert(!isNotActivated);
@@ -124,7 +125,7 @@ private with sharing class LWCOrderProductsControllerTest {
         
         HttpResponse res = new HttpResponse();
         Test.startTest();
-            LWCOrderProductsController.callExternalAfterActivation('Order', ord.Id);
+            LWCXLineItemsController.callExternalAfterActivation('Order', ord.Id);
         Test.stopTest();
     }
 
@@ -235,3 +236,4 @@ private with sharing class LWCOrderProductsControllerTest {
         insert new List<OrderItem>{oli1, oli2, oli3};
     }
 }
+
