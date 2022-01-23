@@ -23,3 +23,13 @@ lwckproject bring us 2 LWC components that can generically interact on Order/Opp
 |----------------|-------------------------------|-----------------------|---------|
 | Debugging   |`Allows you to debug Apex code` |true/false|Boolean
 |ExternalEndPoint          |`URL for sending the X information when activated` |https://example.com/test            | String
+
+### General Information about the project
+- Working time:
+	- Configuration: 1 hour
+	- Business analysis: 2 hours
+	- Backend: 4.5 hours
+	- Frontend: 7 hours
+	- Documentation: 1 hour
+	- **Total**: Around 15.5 hours
+- Testing: TDD methodology 
