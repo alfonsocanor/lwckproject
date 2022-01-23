@@ -1,6 +1,27 @@
 public with sharing class LWCOrderProductsController {
 
     @AuraEnabled
+    public static Boolean isStatusActivated(String parentName, String parentId){
+        String selectQuery = 'SELECT Status ';
+        String fromQuery = 'FROM ' + parentName;
+        String whereQuery = ' WHERE Id=\'' + parentId + '\'';
+        SObject parentObject = Database.query(selectQuery + fromQuery + whereQuery);
+
+        return parentObject.get('Status') == 'Activated' ? true : false;
+    }
+
+    @AuraEnabled
+    public static void activateParentObject(String parentName, String parentId){
+        SObject parentObject = Schema.getGlobalDescribe().get(parentName).newSObject();
+
+        parentObject.put('Id', parentId);
+        parentObject.put('Status', 'Activated');
+
+        KProjectDebugging.printDebug('parentObject', parentObject);
+        update parentObject;
+    }
+
+    @AuraEnabled
     public static List<LWCDatatableDataWrapper> getXLineItems(String parentName, String parentId){
         List<LWCDatatableDataWrapper> currentXLineItems = new List<LWCDatatableDataWrapper>();
 

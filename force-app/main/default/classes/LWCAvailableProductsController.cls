@@ -4,18 +4,22 @@ public with sharing class LWCAvailableProductsController {
     public static PricebookResponseWrapper prepareComponentBasedOnPricebook(String parentName, String parentId){
         String subQueryObject = Constants.PARENT_XLINEITEMCHILD.get(parentName) + 's';
 
-        String selectQuery = 'SELECT Pricebook2Id, Pricebook2.Name ';
+        String selectQuery = 'SELECT Status, Pricebook2Id, Pricebook2.Name ';
         String selectSubQuery = ', (SELECT Id FROM ' + subQueryObject + ') ';
         String fromQuery = 'FROM ' + parentName;
         String whereQuery = ' WHERE Id=\'' + parentId + '\'';
         SObject parentAndLineItems = Database.query(selectQuery + selectSubQuery + fromQuery + whereQuery);
         
+        if(parentAndLineItems.get('Status') == 'Activated'){
+            return new PricebookResponseWrapper(true, null, null);
+        }
+
         if(parentAndLineItems.getSObjects(subQueryObject) == null){
-            return new PricebookResponseWrapper(true, getAllPricebooks());
+            return new PricebookResponseWrapper(false, true, getAllPricebooks());
         } 
 
         return new PricebookResponseWrapper(
-            false, 
+            false, false, 
             new List<LWCComboBoxPricebookWrapper>{
                 new LWCComboBoxPricebookWrapper(
                     (String)parentAndLineItems.getSObject('Pricebook2').get('Name'), 
@@ -127,9 +131,11 @@ public with sharing class LWCAvailableProductsController {
     }
 
     public class PricebookResponseWrapper{
+        @AuraEnabled public Boolean xIsActive;
         @AuraEnabled public Boolean canChange;
         @AuraEnabled public List<LWCComboBoxPricebookWrapper> pricebooks;
-        public PricebookResponseWrapper(Boolean canChange,List<LWCComboBoxPricebookWrapper> pricebooks){
+        public PricebookResponseWrapper(Boolean xIsActive, Boolean canChange,List<LWCComboBoxPricebookWrapper> pricebooks){
+            this.xIsActive = xIsActive;
             this.canChange = canChange;
             this.pricebooks = pricebooks;
         }

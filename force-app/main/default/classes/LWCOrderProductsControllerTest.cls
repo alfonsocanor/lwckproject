@@ -41,10 +41,82 @@ private with sharing class LWCOrderProductsControllerTest {
     }
 
     @isTest
-    static void updateOrderTheStatusOfTheOrderToActivated(){}
+    static void changeTheStatusOfTheRecordToActivated(){
+        Test.startTest();
+            Order ordBeforeUpdate = [
+                SELECT Status
+                FROM Order
+                WHERE Id = :ord.Id
+            ];
+
+            System.assertNotEquals('Activated', ord.Status);
+
+            LWCOrderProductsController.activateParentObject('Order', ord.Id);
+        Test.stopTest();
+
+        Order ordAfterUpdate = [
+            SELECT Status
+            FROM Order
+            WHERE Id = :ord.Id
+        ];
+
+        System.assertEquals('Activated', ordAfterUpdate.Status);
+    }
 
     @isTest
-    static void rejectUpdateOrderIfStatusOfTheOrderIsAlreadyActived(){}
+    static void removeTheXliIfTheQuantityIsEqualsToOne(){
+        Test.startTest();
+            OrderItem oliBeforeUpdate = [
+                SELECT Quantity
+                FROM OrderItem
+                WHERE Id = :oli1.Id
+            ];
+
+            System.assertEquals(1, oliBeforeUpdate.Quantity);
+
+            LWCOrderProductsController.handleXLineItemUpdate('Order', oli1.Id);
+        Test.stopTest();
+
+        List<OrderItem> oliAfterUpdate = [
+            SELECT Quantity
+            FROM OrderItem
+            WHERE Id = :oli1.Id
+        ];
+
+        System.assert(oliAfterUpdate.isEmpty());
+    }
+
+    @isTest
+    static void decreaseTheQuantityOfTheXliBecauseCurrentQuantityIsGreaterThatOne(){
+        Test.startTest();
+            OrderItem oliBeforeUpdate = [
+                SELECT Quantity
+                FROM OrderItem
+                WHERE Id = :oli2.Id
+            ];
+
+            System.assertEquals(3, oliBeforeUpdate.Quantity);
+
+            LWCOrderProductsController.handleXLineItemUpdate('Order', oli2.Id);
+        Test.stopTest();
+
+        OrderItem oliAfterUpdate = [
+            SELECT Quantity
+            FROM OrderItem
+            WHERE Id = :oli2.Id
+        ];
+
+        System.assertEquals(2, oliAfterUpdate.Quantity);
+    }
+
+    @isTest
+    static void returnFalseIfTheStatusOfTheRecordIsNotActivated(){
+        Test.startTest();
+            Boolean isNotActivated = LWCOrderProductsController.isStatusActivated('Order',ord.Id);
+        Test.stopTest();
+
+        System.assert(!isNotActivated);
+    }
 
     static Account acc;
     static Order ord;

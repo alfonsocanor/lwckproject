@@ -38,9 +38,13 @@ export default class LwcAvailableProducts extends LightningElement {
     sortDirection = 'asc';
     sortedBy;
 
+    xIsActive = false;
+
     @track options;
     value = '';
     readOnlyPricebook = false;
+    
+    xIsActive = false;
 
     @wire(MessageContext)
     messageContext;
@@ -59,6 +63,11 @@ export default class LwcAvailableProducts extends LightningElement {
                 parentName: this.parentName,
                 parentId: this.recordId})
         .then(response => {
+            if(response.xIsActive){
+                this.xIsActive = true;
+                return;
+            }
+
             if(response.canChange){
                 this.options = response.pricebooks;
                 this.isLoading = false;
@@ -150,12 +159,18 @@ export default class LwcAvailableProducts extends LightningElement {
     }
     
     handleMessageFromLightningMessageService(message){
-        this.isLoading = true;
-        this.readOnlyPricebook = false;
-        this.getAllPricebooksFromApex();
-        setTimeout(function(){
-            this.isLoading = false;
-        }.bind(this),1000);
+        if(message.message.xIsActive){
+            this.xIsActive = true;
+        }
+
+        if(message.message.updatePricebook){
+            this.isLoading = true;
+            this.readOnlyPricebook = false;
+            this.getAllPricebooksFromApex();
+            setTimeout(function(){
+                this.isLoading = false;
+            }.bind(this),1000);
+        }
     }
 
     sortBy(field, reverse, primer) {

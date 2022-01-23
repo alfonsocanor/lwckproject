@@ -1,34 +1,41 @@
 <template>
     <article class="slds-card" style="min-height: 92px;">
-        <template if:true={isLoading}>
-            <lightning-spinner alternative-text="Preparing" size="small"></lightning-spinner>
-        </template>   
-        <div class="slds-card__header slds-grid">
-            <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                <lightning-combobox
-                    required
-                    label="Select Pricebook"
-                    value={value}
-                    options={options}
-                    onchange={handleComboboxPricebook}
-                    read-only={readOnlyPricebook}>
-                </lightning-combobox>
-            </header>
-        </div>
-        <div class="slds-card__body slds-card__body_inner">
-            <template if:true={renderDatatable}>
-                <div style="height: 300px;">
-                    <lightning-datatable
-                        key-field="pricebookEntryId"
-                        data={data}
-                        columns={columns}
-                        sorted-by={sortedBy}
-                        onsort={onHandleSort}
-                        onrowaction={handleRowAction}
-                        hide-checkbox-column>
-                    </lightning-datatable>
-                </div> 
-            </template>
-        </div>
+        <template if:true={xIsActive}>
+            <div style="width: 100%; text-align:center;">
+                <span>{parentName}&nbsp;Activated</span>
+            </div>
+        </template>
+        <template if:false={xIsActive}>
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Preparing" size="small"></lightning-spinner>
+            </template>   
+            <div class="slds-card__header slds-grid">
+                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                    <lightning-combobox
+                        required
+                        label="Select Pricebook"
+                        value={value}
+                        options={options}
+                        onchange={handleComboboxPricebook}
+                        read-only={readOnlyPricebook}>
+                    </lightning-combobox>
+                </header>
+            </div>
+            <div class="slds-card__body slds-card__body_inner">
+                <template if:true={renderDatatable}>
+                    <div style="height: 300px;">
+                        <lightning-datatable
+                            key-field="pricebookEntryId"
+                            data={data}
+                            columns={columns}
+                            sorted-by={sortedBy}
+                            onsort={onHandleSort}
+                            onrowaction={handleRowAction}
+                            hide-checkbox-column>
+                        </lightning-datatable>
+                    </div> 
+                </template>
+            </div>
+        </template>
     </article>  
 </template>

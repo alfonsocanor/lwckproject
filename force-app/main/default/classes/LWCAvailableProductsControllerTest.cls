@@ -2,6 +2,73 @@
 private with sharing class LWCAvailableProductsControllerTest {
     
     @isTest
+    static void ifTheOrderIsActivatedReturnIsActivated(){
+        Order ordBeforeUpdate = [
+            SELECT Status
+            FROM Order
+            WHERE Id = :ord.Id
+        ];
+
+        ordBeforeUpdate.Status = 'Activated';
+        update ordBeforeUpdate;
+
+        Test.startTest();
+            LWCAvailableProductsController.PricebookResponseWrapper response =
+                LWCAvailableProductsController.prepareComponentBasedOnPricebook('Order', ord.Id);
+        Test.stopTest();
+
+        System.assert(response.xIsActive);
+    }
+
+    @isTest
+    static void ifTheOrderContainsXliReturnCanChangeFalseBecauseThePricebookCanNotChange(){
+        Test.startTest();
+            LWCAvailableProductsController.PricebookResponseWrapper response =
+                LWCAvailableProductsController.prepareComponentBasedOnPricebook('Order', ord.Id);
+        Test.stopTest();
+
+        System.assert(!response.canChange);
+    }
+
+    @isTest
+    static void ifTheOrderDoesNotContainsXLiReturnCanChangeTrueSoPriceboooksCanChange(){
+        delete [SELECT Id FROM OrderItem WHERE OrderId = :ord.Id];
+
+        Test.startTest();
+            LWCAvailableProductsController.PricebookResponseWrapper response =
+                LWCAvailableProductsController.prepareComponentBasedOnPricebook('Order', ord.Id); 
+        Test.stopTest();
+
+        System.assert(response.canChange);
+    }
+
+    @isTest
+    static void setThePricebookToTheOrder(){
+        delete [SELECT Id FROM OrderItem WHERE OrderId = :ord.Id];
+        
+        Test.startTest();
+            Order ordBeforeUpdate = [
+                SELECT Pricebook2Id
+                FROM Order
+                WHERE Id = :ord.Id
+            ];
+
+            System.assertEquals(stdPricebook.Id, ordBeforeUpdate.Pricebook2Id);
+
+            LWCAvailableProductsController.setPricebookOnParent(ord.Id, 'Order', testPricebook.Id);
+        Test.stopTest();
+
+        Order ordAfterUpdate = [
+            SELECT Pricebook2Id
+            FROM Order
+            WHERE Id = :ord.Id
+        ];
+
+        System.assertEquals(testPricebook.Id, ordAfterUpdate.Pricebook2Id);
+
+    }
+
+    @isTest
     static void retrieveProductsBasedOnPricebookWithPricebookEntryActive(){
         Test.startTest();
             List<LWCAvailableProductsController.LWCDatatableDataWrapper> availableProductPerPricebookList = 
@@ -9,7 +76,7 @@ private with sharing class LWCAvailableProductsControllerTest {
         Test.stopTest();
 
         System.assertEquals(3, availableProductPerPricebookList.size());
-    }
+    } 
 
     @isTest
     static void addProductToTheLineItemsOfTheProductIfTheProductDoesNotExistInTheLineItemAndAssignQuantityEqualsToOne(){
@@ -43,17 +110,11 @@ private with sharing class LWCAvailableProductsControllerTest {
         System.assertEquals(2.00, oliUpdateQuantityP1.Quantity);
     }
 
-    @isTest
-    static void rejectAddProductIfStatusOfTheOrderIsActived(){}
-
-    @isTest 
-    static void sortProductsAtTheTopIfTheOrderContainsLineItems(){}
-
     static Account acc;
     static Order ord;
     static OrderItem oli1;
     static Product2 p1, p2, p3, p4;
-    static Pricebook2 stdPricebook;
+    static Pricebook2 stdPricebook, testPricebook;
     static PricebookEntry pbeStd1, pbeStd2, pbeStd3, pbeStd4NotActive;
     static{
         stdPricebook = Builder.aPricebook()
@@ -62,7 +123,12 @@ private with sharing class LWCAvailableProductsControllerTest {
             .setName('Standard Price Book')
             .build();
         
-        upsert stdPricebook;
+        testPricebook = Builder.aPricebook()
+            .setIsActive(true)
+            .setName('Test Price Book')
+            .build();
+        
+        upsert new List<Pricebook2>{stdPricebook, testPricebook};
 
         p1 = Builder.aProduct()
             .setName('Product1')

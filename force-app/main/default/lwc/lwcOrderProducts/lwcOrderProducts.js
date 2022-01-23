@@ -2,6 +2,8 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { updateRecord } from 'lightning/uiRecordApi';
 import getXLineItems from '@salesforce/apex/LWCOrderProductsController.getXLineItems';
 import handleXLineItemUpdate from '@salesforce/apex/LWCOrderProductsController.handleXLineItemUpdate';
+import isStatusActivated from '@salesforce/apex/LWCOrderProductsController.isStatusActivated';
+import activateParentObject from '@salesforce/apex/LWCOrderProductsController.activateParentObject';
 
 import {
     APPLICATION_SCOPE,
@@ -39,13 +41,16 @@ export default class LwcOrderProducts extends LightningElement {
     isLoading = false;
 
     updateFromXliDelete = false;
+    disableActivationButton = true;
+    xIsActive = true;
+
+    renderDatatable = false;
 
     @wire(MessageContext)
     messageContext;
 
     connectedCallback(){
-        this.subscribeToMessageChannel();
-        this.getXLineItemsFromApex();
+        this.isStatusActivatedFromApex();
     }
 
     disconnectedCallback(){
@@ -59,10 +64,11 @@ export default class LwcOrderProducts extends LightningElement {
         })
         .then(data => {
             this.isLoading = false;
+            this.renderDatatable = true;
             this.data = data;
-
+            this.disableActivationButton = this.data.length === 0 ? true : false;
             if(this.updateFromXliDelete && this.data.length === 0){
-                publish(this.messageContext, updatePricebookOptions, { message: 'update pricebook options...' });
+                this.publishLightningMessageService({updatePricebook: true});
             }
 
             this.updateFromXliDelete = false;
@@ -71,6 +77,27 @@ export default class LwcOrderProducts extends LightningElement {
             console.log('error:', error);
         })
 
+    }
+
+    publishLightningMessageService(message){
+        publish(this.messageContext, updatePricebookOptions, { message });
+    }
+
+    isStatusActivatedFromApex(){
+        isStatusActivated({
+            parentName: this.parentName,
+            parentId: this.recordId
+        })
+        .then(isActive => {
+            this.xIsActive = isActive;
+            if(!isActive){
+                this.subscribeToMessageChannel();
+            } else {
+                this.columns.pop();
+            }
+            
+            this.getXLineItemsFromApex();
+        })
     }
 
     handleRowAction(event){
@@ -114,6 +141,29 @@ export default class LwcOrderProducts extends LightningElement {
         this.isLoading = true;
         this.updateCauseByLightningMessageService = true;
         this.refreshTableAndPage();
+    }
+
+    handleXActivation(){
+        this.isLoading = true;
+        this.activateParentObjectFromApex();
+    }
+
+    activateParentObjectFromApex(){
+        activateParentObject({
+            parentId: this.recordId,
+            parentName: this.parentName
+        })
+        .then(() => {
+            this.xIsActive = true;
+            this.isLoading = true;
+            this.renderDatatable = false;
+            this.columns.pop();
+            this.refreshTableAndPage();
+            this.publishLightningMessageService({ xIsActive: true })
+        })
+        .catch(error => {
+            console.log('error',error);
+        })
     }
 
     sortBy(field, reverse, primer) {
