@@ -32,7 +32,6 @@ $RECYCLE.BIN/
 !.gitignore
 !package.json
 !README.md
-!/Manifest
 !/force-app
 /force-app/*
 !/force-app/main
