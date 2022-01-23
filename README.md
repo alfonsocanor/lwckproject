@@ -1,18 +1,25 @@
-# Salesforce DX Project: Next Steps
+# lwckproject
+lwckproject bring us 2 LWC components that can generically interact on Order/Opportunity/Quotes UI, performing DML on Line Items and allows you to activate and send order information to an external system using REST Api
+ 
+# Installation
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+- Use the metadata in this git in your Org
 
-## How Do You Plan to Deploy Your Changes?
+# Configuration
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+- Drag and Drop the component from App Builder on Page Layouts of: Order, Opportunity or Quote
 
-## Configure Your Salesforce DX Project
+# Files Summary
+- 2 LWC: [lwcAvailableProducts](https://github.com/alfonsocanor/lwckproject/tree/master/force-app/main/default/lwc/lwcAvailableProducts "lwcAvailableProducts") and [lwcXLineItems](https://github.com/alfonsocanor/lwckproject/tree/master/force-app/main/default/lwc/lwcXLineItems "lwcXLineItems")
+- 2 Business logic classes: [LWCAvailableProductsController.cls](https://github.com/alfonsocanor/lwckproject/blob/master/force-app/main/default/classes/LWCAvailableProductsController.cls "LWCAvailableProductsController.cls") and [LWCXLineItemsController.cls](https://github.com/alfonsocanor/lwckproject/blob/master/force-app/main/default/classes/LWCXLineItemsController.cls "LWCXLineItemsController.cls")
+- Debugging class: [KProjectDebugging.cls](https://github.com/alfonsocanor/lwckproject/blob/master/force-app/main/default/classes/KProjectDebugging.cls "KProjectDebugging.cls")
+- Custom Settings [objects/Settings_K_Project__c](https://github.com/alfonsocanor/lwckproject/tree/master/force-app/main/default/objects/Settings_K_Project__c "This path skips through empty directories")
 
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
+  
 
-## Read All About It
-
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+### Important - Custom Settings 'Settings_K_Project__c' Records
+  
+| Name     |Description                   |Example                |Value |
+|----------------|-------------------------------|-----------------------|---------|
+| Debugging   |`Allows you to debug Apex code` |true/false|Boolean
+|ExternalEndPoint          |`URL for sending the X information when activated` |https://example.com/test            | String
